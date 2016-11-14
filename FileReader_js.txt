@@ -1,0 +1,85 @@
+var mqtt = require('mqtt')
+var client = mqtt.connect('mqtt://ec2-35-161-110-220.us-west-2.compute.amazonaws.com')
+var fs = require('fs'); 
+var parse = require('csv-parse');
+var moment = require('moment');
+var sleep = require('sleep');
+var utilPower = 0;
+var mapUtil = {"Lights":5,"Heater":15,"Ac":20,"Stove":10}
+var csvData;
+
+
+
+client.on('connect',function(){
+    console.log("Service online");
+    fs.createReadStream("Temperature.csv")
+    .pipe(parse({delimiter: ':'}))
+    .on('data', function(csvrow) {
+        csvData = csvData+'\n'+csvrow;        
+    })
+    .on('end',function() {
+
+        client.publish('/stats','Initializing the environment!');
+        client.publish('/Main110_Ac','on');
+        sleep.sleep(5);
+        utilPower = utilPower+mapUtil["Ac"];
+        client.publish('/Main110_Lights','on');
+        utilPower = utilPower+mapUtil["Lights"];
+        console.log("Current power utilization : " + utilPower);
+
+        var last = "",lines, i,dbDate,resultDate;
+        var dateFormat = 'YYYY-MM-DD HH:mm:ss',minutes = 30,df='HHmm';
+        dbDate = '2016-06-11 06:00:00';
+
+        lines = (last+csvData).split("\n");
+        for(i = 2; i < 27; i++) {
+            if(i>lines.length-1)
+            {
+                client.publish('/system_time',moment(dbDate).format(df));
+                console.log("Logged at : "+moment(dbDate).format(df));
+                client.publish('/stats','Nothing schduled for this time');
+                dbDate = moment(dbDate).add(minutes,'minutes').format(dateFormat);
+            }else{
+                var str = lines[i].split(",");
+                client.publish('/system_time',str[0]);
+                client.publish('/system_curtemp',str[1]);
+                
+                if(parseInt(str[2])-utilPower<=10){
+                    client.publish('/stats','Nothing schduled for this time');
+                    console.log("Currently utilizing : "+utilPower);
+                }
+
+                if(str[4]!="stats"){
+                    client.publish('/Main110_'+str[4],str[5]);
+                    if(str[5]=="on" || str[5]=="1"){
+                        utilPower += mapUtil[str[4]];
+                        console.log(mapUtil[str[4]]);
+                    }
+                    else if(str[5]=="off" || str[5]=="0"){
+                        utilPower -= mapUtil[str[4]];
+                        console.log(mapUtil[str[4]]);
+                    }
+                    else if(str[5]=="0.5"){
+                        utilPower += (mapUtil[str[4]])/2;
+                    }
+                    console.log("Scheduled event "+str[4]+" switched "+str[5]+" current util : "+utilPower);
+                }
+                console.log("Logged at : "+str[0]);
+                dbDate = moment(dbDate).add(minutes,'minutes').format(dateFormat);
+            }
+            
+            sleep.sleep(5);
+
+            client.publish('/Main110_Lights','0');
+            client.publish('/Main110_Heater','off');
+            client.publish('/Main110_Ac','off');
+            client.publish('/Main110_Stove','off');
+        }
+        conn.on("close", function (code, reason) {
+        console.log("Connection closed")
+    })
+        process.exit();
+});
+
+
+});
