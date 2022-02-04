@@ -11,3 +11,9 @@ This does not have to be a "big brother decides" system. Consumers would still b
 We often start our dishwasher in the morning so we have clean dishes when we get home for dinner. A smart controller could coordinate with the grid to run at the most efficient time that avoids peaks but still gets our dishes washed when we need them.
 
 For more details: [https://github.com/anojalax/Smart-Outlet-To-Reduce-Peak-Power-Needs/blob/master/Smart%20Outlet%20To%20Reduce%20Peak%20Power%20Needs.pdf]
+
+
+# Update
+This project won the Hack the Planet - AWS + Intel Hardware Hackathon in 2016 
+Please visit the link below for details
+https://www.hackster.io/30306/smart-outlet-to-reduce-peak-power-needs-b40c35
