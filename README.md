@@ -1,3 +1,5 @@
+# Smart Outlet To Reduce Peak Power Needs
+
 Baseline electrical generation is relatively efficient and clean. Peak power generation is expensive and dirty. Additional peak power generation capacity can be unavailable during periods of peak demand and in off-grid environments.
 
 Electrical demand is determined independently by consumers who have minimal knowledge of the instantaneous state of the power grid and no tools for managing their usage besides individual power switches. Power companies have no direct knowledge of short term future demand and are therefore always in a reactive operating mode.
